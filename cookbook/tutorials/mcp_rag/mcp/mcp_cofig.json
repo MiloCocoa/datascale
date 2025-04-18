@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "demo": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/Users/poomwettayakorn/workspace/datascale/datascale/cookbook/tutorials/mcp_rag/mcp/",
+        "run",
+        "mcp_simple.py"
+      ]
+    },
+    "local_vec": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/Users/poomwettayakorn/workspace/datascale/datascale/cookbook/tutorials/mcp_rag/mcp/",
+        "run",
+        "mcp_local_vec.py"
+      ]
+    },
+    "remove_vec": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/Users/poomwettayakorn/workspace/datascale/datascale/cookbook/tutorials/mcp_rag/mcp/",
+        "run",
+        "mcp_remote_vec.py"
+      ],
+      "env": {
+        "VECTOR_API_URL": "http://localhost:8000/api/v1",
+        "VECTOR_API_KEY": "mcp-vector-search-api-key"
+      }
+    }
+  }
+}

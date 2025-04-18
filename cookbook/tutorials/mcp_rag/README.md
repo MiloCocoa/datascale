@@ -18,8 +18,8 @@ RAG_MATCH_COUNT=4
 
 ### Command
 ```bash
-uv init vector-search
-cd vector-search
+uv init mcp_rag
+cd mcp_rag
 
 uv venv --python 3.11.6
 
