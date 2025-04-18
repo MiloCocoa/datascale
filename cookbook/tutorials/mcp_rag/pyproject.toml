@@ -1,0 +1,21 @@
+[project]
+name = "vector-search"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi[standard]<1.0.0,>=0.115.12",
+    "google-genai>=1.9.0",
+    "langchain-community>=0.3.20",
+    "langchain>=0.3.22",
+    "pydantic>=2.11.1",
+    "pydantic-settings>=2.8.1",
+    "supabase>=2.15.0",
+    "mcp[cli]>=1.6.0",
+    "sentence-transformers>=4.0.1",
+    "chromadb>=0.6.3",
+    "ipykernel>=6.29.5",
+    "pandas>=2.2.3",
+    "ipython>=9.0.2",
+]

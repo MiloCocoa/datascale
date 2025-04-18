@@ -1,0 +1,13 @@
+.DS_Store
+.vscode
+.env
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+*.pyc
+build/
+dist/
+wheels/
+*.egg-info
+
