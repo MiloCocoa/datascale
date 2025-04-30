@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Markdown File Indexer for Supabase Vector Search
+Text File Indexer for Embedding Generation
 
 This script:
-1. Finds all *.md files in the specified directory
+1. Finds all files with specified extensions in the given directory
 2. Splits them into chunks using RecursiveCharacterTextSplitter
 3. Generates embeddings using Gemini
-4. Uploads the embeddings to Supabase for vector search
+4. Saves the embeddings to a JSON file
 """
 
 import os
@@ -38,15 +38,15 @@ OUTPUT_JSON_FILE   = "embeddings.json"
 model_id = os.getenv("GEMINI_EMBEDDING_ID", "text-embedding-004")
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-def read_markdown_file(file_path: str) -> str:
+def read_text_file(file_path: str) -> str:
     """
-    Read a markdown file and return its contents
+    Read a text file and return its contents
 
     Args:
-        file_path: Path to the markdown file
+        file_path: Path to the text file
 
     Returns:
-        String content of the markdown file
+        String content of the text file
     """
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -147,12 +147,13 @@ def embed_content(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
     return all_chunks_with_embeddings
 
-def index_markdown_files(directory: str, dry_run: bool = False) -> Dict[str, Any]:
+def index_markdown_files(directory: str, file_types: List[str], dry_run: bool = False) -> Dict[str, Any]:
     """
-    Find all markdown files in a directory and index them
+    Find all specified file types in a directory and index them
 
     Args:
-        directory: Path to directory to scan for .md files
+        directory: Path to directory to scan for files
+        file_types: List of file extensions to index (e.g., ['.md', '.txt'])
         dry_run: If True, don't actually upload to Supabase
 
     Returns:
@@ -160,17 +161,24 @@ def index_markdown_files(directory: str, dry_run: bool = False) -> Dict[str, Any
     """
     start_time = time.time()
     all_processed_chunks = []
+    all_found_files = []
 
-    # Find all markdown files
-    md_files = glob.glob(f"{directory}/**/*.md", recursive=True)
+    # Find all specified file types
+    for file_type in file_types:
+        # Ensure the file type starts with a dot
+        if not file_type.startswith('.'):
+            file_type = '.' + file_type
+        found = glob.glob(f"{directory}/**/*{file_type}", recursive=True)
+        all_found_files.extend(found)
+        print(f"Found {len(found)} files with extension {file_type}")
 
-    if not md_files:
+    if not all_found_files:
         return {
             "status": "error",
-            "message": f"No markdown files found in {directory}"
+            "message": f"No files with specified extensions ({', '.join(file_types)}) found in {directory}"
         }
 
-    print(f"Found {len(md_files)} markdown files in {directory}")
+    print(f"Found a total of {len(all_found_files)} files to process in {directory}")
 
     # Statistics
     stats = {
@@ -182,16 +190,16 @@ def index_markdown_files(directory: str, dry_run: bool = False) -> Dict[str, Any
     }
 
     # Process files in batches
-    for i in range(0, len(md_files), BATCH_SIZE):
-        batch = md_files[i:i + BATCH_SIZE]
+    for i in range(0, len(all_found_files), BATCH_SIZE):
+        batch = all_found_files[i:i + BATCH_SIZE]
 
         all_chunks = []
 
         # Process each file in the batch
         for file_path in batch:
             try:
-                # Read the markdown file
-                content = read_markdown_file(file_path)
+                # Read the file
+                content = read_text_file(file_path)
                 if not content:
                     stats["files_failed"] += 1
                     continue
@@ -224,7 +232,7 @@ def index_markdown_files(directory: str, dry_run: bool = False) -> Dict[str, Any
             print(f"Added {len(valid_chunks)} valid chunks from batch {i//BATCH_SIZE + 1}")
 
         # Add a small delay between batches to avoid rate limits
-        if i + BATCH_SIZE < len(md_files):
+        if i + BATCH_SIZE < len(all_found_files):
             time.sleep(1)
 
     # Calculate total processing time
@@ -260,9 +268,10 @@ def index_markdown_files(directory: str, dry_run: bool = False) -> Dict[str, Any
 
 def main():
     """Main function to parse arguments and run the indexer"""
-    parser = argparse.ArgumentParser(description="Index markdown files for vector search")
-    parser.add_argument("--directory", nargs="?", default=".", help="Directory to scan for markdown files (default: current directory)")
-    parser.add_argument("--dry-run", action="store_true", help="Perform a dry run without uploading to Supabase")
+    parser = argparse.ArgumentParser(description="Index text files for vector search")
+    parser.add_argument("--directory", nargs="?", default=".", help="Directory to scan for files (default: current directory)")
+    parser.add_argument("--file-types", nargs='+', default=['.md'], help="List of file extensions to index (default: .md), e.g., --file-types .md .txt .rst")
+    parser.add_argument("--dry-run", action="store_true", help="Perform a dry run without writing embeddings to file")
 
     args = parser.parse_args()
 
@@ -272,7 +281,7 @@ def main():
         sys.exit(1)
 
     # Run the indexer
-    result = index_markdown_files(args.directory, args.dry_run)
+    result = index_markdown_files(args.directory, args.file_types, args.dry_run)
 
     # Print the result
     if result["status"] == "success":

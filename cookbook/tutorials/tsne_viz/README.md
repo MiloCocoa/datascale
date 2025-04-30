@@ -6,7 +6,7 @@
 # source venv/bin/activate
 
 pip install -r requirements.txt
-python indexer.py --directory awesome-llm-apps
+python indexer.py --directory awesome-llm-apps --file-types .md .py
 ```
 
 ## Indexer
