@@ -271,7 +271,7 @@ def index_markdown_files(directory: str, dry_run: bool = False) -> Dict[str, Any
 def main():
     """Main function to parse arguments and run the indexer"""
     parser = argparse.ArgumentParser(description="Index markdown files for vector search")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan for markdown files (default: current directory)")
+    parser.add_argument("--directory", nargs="?", default=".", help="Directory to scan for markdown files (default: current directory)")
     parser.add_argument("--dry-run", action="store_true", help="Perform a dry run without uploading to Supabase")
 
     args = parser.parse_args()

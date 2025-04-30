@@ -15,9 +15,6 @@ def add(a: int, b: int) -> int:
 def count_r(word: str) -> int:
     """Count the number of 'r' letters in a given word."""
     try:
-        # Add robust error handling
-        if not isinstance(word, str):
-            return 0
         return word.lower().count("r")
     except Exception as e:
         # Return 0 on any error
