@@ -12,4 +12,5 @@ Manage your data models, database diagrams, data catalog, and wiki - all in one 
 
 ## Tutorials
 
-* [Building RAG on Supabase with FastAPI and Gemini](./cookbook/tutorials/mcp_rag/)
+* [Building an MCP RAG with Gemini embeddings and Supabase vector](./cookbook/tutorials/mcp_rag/)
+* [Visualizing vector embeddings with t-SNE](./cookbook/tutorials/tsne_viz/)
