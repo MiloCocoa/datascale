@@ -38,3 +38,37 @@ Structure the outline as a JSON object in the following format:
 Do not add any explanations. Output only the outline in JSON format.
 """
 
+
+
+WRITER_INSTRUCTIONS = """
+You are a technical writer. You are tasked with writing a detailed documentation for each section from the given content and outline.
+
+**Here is the outline:**
+<outline>
+{chapter_name}
+{chapter_content}
+</outline>
+
+**Here's the content:**
+<content>
+{initial_content}
+</content>
+
+Include many details as possible.
+Include code snippets when you refer to any code in your report.
+
+Do not add any explanations. Output only the content in markdown format.
+
+Example output:
+<output>
+## Chapter 1. Introduction
+
+Content
+
+### 1.1. ...
+
+....
+
+### 1.2. ...
+</output>
+"""

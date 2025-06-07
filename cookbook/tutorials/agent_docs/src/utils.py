@@ -29,9 +29,9 @@ def parse_planner_response(response: str) -> Dict:
     return chapters
 
 
-def write_planner_response(response: str):
+def write_json_response(file_name: str, response: Dict):
     """
-    Write the planner response to a file.
+    Write the response to a file.
     """
-    with open("output/planner_response.json", "w") as f:
+    with open(f"output/{file_name}.json", "w") as f:
         json.dump(response, f, indent=2)

@@ -1,16 +1,16 @@
 import json
 import asyncio
+from typing import Dict
 from loguru import logger
 from dotenv import load_dotenv
 
-from google.adk import Runner
-from google.adk.agents import LlmAgent, SequentialAgent
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
 from config import APP_NAME, USER_ID, SESSION_ID
-from src.utils import read_codebase, write_planner_response
+from src.utils import read_codebase, write_json_response
 from src.planner import create_documentation_outline
+from src.writer import sequential_writing_pipeline
 
 load_dotenv()
 
@@ -35,16 +35,36 @@ async def call_agents(initial_content: str):
 
     # 2. Planner Agent
     # ====================================================================
-    chapters = await create_documentation_outline(
+    import os
+
+    # Check if docs_plan.json exists
+    docs_plan: Dict = dict()
+
+    if os.path.exists("output/docs_plan.json"):
+        logger.info("Found existing docs_plan.json, skipping planner step")
+        with open("output/docs_plan.json", "r") as f:
+            docs_plan = json.load(f)
+    else:
+        docs_plan = await create_documentation_outline(
+            session_service = session_service,
+            initial_content = initial_content,
+            USER_ID         = USER_ID,
+            SESSION_ID      = SESSION_ID
+        )
+        if not docs_plan: return
+
+        write_json_response("docs_plan", docs_plan)
+
+
+    # 3. Writer Sub-agents
+    # ====================================================================
+    await sequential_writing_pipeline(
         session_service = session_service,
         initial_content = initial_content,
+        docs_plan       = docs_plan,
         USER_ID         = USER_ID,
         SESSION_ID      = SESSION_ID
     )
-    if not chapters: return
-
-    write_planner_response(chapters)
-
 
 
 # Run the Agent
