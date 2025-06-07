@@ -1,5 +1,3 @@
-Okay, I will now write a detailed documentation for each section from the given content and outline, in markdown format.
-
 ## Chapter 8. Mapping Tables
 
 Mapping tables are a crucial part of the data pipeline, serving as a bridge between source data and dimension keys. They ensure data consistency and enable efficient querying and analysis. This chapter details the structure and purpose of various mapping tables used within the data pipeline.

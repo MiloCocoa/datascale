@@ -1,4 +1,3 @@
-```markdown
 ## Chapter 1. Mart CRM Touchpoint Table
 ### Purpose of the Table
 The `mart_crm_touchpoint` table is designed to provide a comprehensive view of customer relationship management (CRM) touchpoints. It consolidates data from multiple source tables, transforming and calculating key metrics to facilitate marketing analysis and reporting. This table enables users to understand the various interactions customers have with the organization, their influence on the customer journey, and their contribution to key marketing outcomes.

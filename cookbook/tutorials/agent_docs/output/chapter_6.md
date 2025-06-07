@@ -1,8 +1,7 @@
-```markdown
 ## Chapter 6. SFDC Preparation Tables
 Details the creation of SFDC preparation tables:
 
-*   **6.1. sfdc_lead_source**
+### 6.1. sfdc_lead_source
     *   Source: `lead`
     *   Key transformations: cleaning and transformation of lead data
 
@@ -373,7 +372,7 @@ SELECT *
 FROM renamed;
 ```
 
-*   **6.2. sfdc_contact_source**
+### 6.2. sfdc_contact_source
     *   Source: `contact`
     *   Key transformations: cleaning and transformation of contact data
 

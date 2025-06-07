@@ -1,7 +1,7 @@
 ## Chapter 5. Restricted Safe Preparation Tables
 Details the creation of restricted safe preparation tables:
 
-*   **5.1. prep_crm_account**
+### 5.1. prep_crm_account
     *   Source: `sfdc_account`, `map_merged_crm_account`, `prep_crm_person`, `sfdc_user_roles_source`
     *   Key transformations: Combines account data with ultimate parent information, applies mappings, and derives metrics like employee count band
 
@@ -48,7 +48,7 @@ The `prep_crm_account` table is a restricted safe preparation table that aggrega
 
 4.  **Data Governance & Filtering:** The final SELECT statement includes the clause `WHERE sfdc_account.account_id IS NOT NULL` to exclude null account ID.
 
-*   **5.2. prep_charge_mrr**
+### 5.2. prep_charge_mrr
     *   Source: `prep_charge`, `prep_date`
     *   Key transformations: Calculates monthly recurring revenue (MRR) for active subscriptions
 
