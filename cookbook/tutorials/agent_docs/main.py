@@ -1,3 +1,4 @@
+import os
 import json
 import asyncio
 from typing import Dict
@@ -5,7 +6,6 @@ from loguru import logger
 from dotenv import load_dotenv
 
 from google.adk.sessions import InMemorySessionService
-from google.genai import types
 
 from config import APP_NAME, USER_ID, SESSION_ID
 from src.utils import read_codebase, write_json_response
@@ -35,11 +35,9 @@ async def call_agents(initial_content: str):
 
     # 2. Planner Agent
     # ====================================================================
-    import os
-
-    # Check if docs_plan.json exists
     docs_plan: Dict = dict()
 
+    # Check if docs_plan.json exists
     if os.path.exists("output/docs_plan.json"):
         logger.info("Found existing docs_plan.json, skipping planner step")
         with open("output/docs_plan.json", "r") as f:
@@ -70,10 +68,9 @@ async def call_agents(initial_content: str):
 # Run the Agent
 async def main():
     logger.info("Running documentation builder")
-
     content = read_codebase("data/gitlab_crm.sql")
 
-    if not content: print("Content not found!")
+    if not content: logger.error("Content not found!")
     else: await call_agents(content)
 
 
