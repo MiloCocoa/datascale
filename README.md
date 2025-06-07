@@ -12,5 +12,6 @@ Manage your data models, database diagrams, data catalog, and wiki - all in one 
 
 ## Tutorials
 
-* [Building an MCP RAG with Gemini embeddings and Supabase vector](./cookbook/tutorials/mcp_rag/)
-* [Visualizing vector embeddings with t-SNE](./cookbook/tutorials/tsne_viz/)
+* [A multi-agent documentation builder](./cookbook/tutorials/agent_docs/)
+* [An MCP RAG with Gemini embeddings and Supabase vector](./cookbook/tutorials/mcp_rag/)
+* [LLM embedding visualization with t-SNE](./cookbook/tutorials/tsne_viz/)
