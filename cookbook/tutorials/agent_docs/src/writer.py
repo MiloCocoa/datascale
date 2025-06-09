@@ -36,7 +36,7 @@ def _construct_writer_agents(
 
         write_report_agent = LlmAgent(
             name             = "WriterAgent",
-            model            = GEMINI_MODEL,
+            model            = WRITER_MODEL,
             include_contents = "none",
             instruction      = WRITER_INSTRUCTIONS.format(
                 initial_content = initial_content,

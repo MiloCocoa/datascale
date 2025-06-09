@@ -7,7 +7,7 @@ from google.adk.agents import LlmAgent
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
-from config import APP_NAME, GEMINI_MODEL
+from config import APP_NAME, PLANNER_MODEL
 from src.prompt import PLANNER_INSTRUCTIONS
 from src.utils import parse_planner_response
 
@@ -24,7 +24,7 @@ async def create_documentation_outline(
 ):
     plan_agent = LlmAgent(
         name             = "PlannerAgent",
-        model            = GEMINI_MODEL,
+        model            = PLANNER_MODEL,
         include_contents = 'none',
         instruction      = PLANNER_INSTRUCTIONS.format(initial_content=initial_content),
         description      = "Writes an outline of a documentation from the given content",
@@ -56,10 +56,11 @@ async def create_documentation_outline(
     # Parse the response
     try:
         docs_plan = parse_planner_response(planner_response)
-        logger.info(f"Finished planner agent response with {len(docs_plan.get('chapters', []))} chapters.")
+        logger.info(f"Finished planner agent response with {len(docs_plan.get('table_of_contents', []))} chapters.")
         return docs_plan
     except Exception as e:
         logger.error(f"Failed to parse the planner response: {e}")
+        logger.error(f"Planner response: {planner_response}")
         return
 
 
