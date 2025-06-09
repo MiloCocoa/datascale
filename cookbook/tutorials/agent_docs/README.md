@@ -16,19 +16,17 @@ python main.py
 Example result:
 
 ```bash
-| INFO     | __main__:main:72 - Running documentation builder
-| INFO     | __main__:call_agents:44 - Found existing docs_plan.json, skipping planner step
-| INFO     | src.writer:_construct_writer_agents:34 - Skipping chapter 1 because it already exists.
-| INFO     | src.writer:_construct_writer_agents:34 - Skipping chapter 2 because it already exists.
-| INFO     | src.writer:_construct_writer_agents:34 - Skipping chapter 3 because it already exists.
-| INFO     | src.writer:_construct_writer_agents:34 - Skipping chapter 4 because it already exists.
-| INFO     | src.writer:_construct_writer_agents:52 - Set up writer agent for: ## Chapter 5. Restricted Safe Preparation Tables...
-| INFO     | src.writer:_construct_writer_agents:52 - Set up writer agent for: ## Chapter 6. SFDC Preparation Tables...
-| INFO     | src.writer:_construct_writer_agents:34 - Skipping chapter 7 because it already exists.
-| INFO     | src.writer:_construct_writer_agents:34 - Skipping chapter 8 because it already exists.
-| INFO     | src.writer:sequential_writing_pipeline:86 - Writing chapters...
-| INFO     | src.writer:sequential_writing_pipeline:90 - Finished chapter 5.
-| INFO     | src.writer:sequential_writing_pipeline:90 - Finished chapter 6.
+2025-06-10 00:03:58.473 | INFO     | __main__:main:70 - Running documentation builder
+2025-06-10 00:03:58.474 | INFO     | __main__:call_agents:42 - Found existing docs_plan.json, skipping planner step
+2025-06-10 00:03:58.475 | INFO     | src.writer:construct_writer_agents:101 - Skipping chapter_100.md because it already exists.
+2025-06-10 00:03:58.475 | INFO     | src.writer:construct_writer_agents:101 - Skipping chapter_200.md because it already exists.
+2025-06-10 00:03:58.475 | INFO     | src.writer:construct_writer_agents:123 - Set up a writing agent for: ## 3. Core CRM Entities -> chapter_300.md
+2025-06-10 00:03:58.475 | INFO     | src.writer:construct_writer_agents:123 - Set up a writing agent for: ### 3.1. CRM Touchpoint (`dim_crm_touchpoint`) -> chapter_310.md
+2025-06-10 00:03:58.475 | INFO     | src.writer:construct_writer_agents:123 - Set up a writing agent for: ### 3.2. CRM Person (`dim_crm_person`, `fct_crm_person`) -> chapter_320.md
+2025-06-10 00:03:58.475 | INFO     | src.writer:sequential_writing_pipeline:159 - Writing chapters...
+2025-06-10 00:04:23.148 | INFO     | src.writer:sequential_writing_pipeline:164 - Finished chapter_300.md.
+2025-06-10 00:04:36.404 | INFO     | src.writer:sequential_writing_pipeline:164 - Finished chapter_310.md.
+2025-06-10 00:04:53.610 | INFO     | src.writer:sequential_writing_pipeline:164 - Finished chapter_320.md.
 ```
 
 

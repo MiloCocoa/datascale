@@ -42,7 +42,7 @@ Do not add any explanations. Output only the outline in JSON format.
 
 Instructions for the chapter:
 - Go from high level to low level details.
-- When you need to refer to other core abstractions covered in other chapters, ALWAYS use proper Markdown links like this: [Chapter Title](chapter_1.1.md).
+- When you need to refer to other core abstractions covered in other chapters, ALWAYS use proper Markdown links like this: [Chapter Title](chapter_110.md). We use 3-digit numbers for chapter numbering, e.g., 1.=100 1.1=110, 1.2=120, etc.
 """
 
 
@@ -73,7 +73,7 @@ Writing instructions:
 - Go from high level to low level details.
 - Begin with a high-level motivation explaining what problem this abstraction solves.
 - Start with a central use case as a concrete example. The chapter should guide the reader to understand how to solve this use case. Make it beginners friendly.
-- When you need to refer to other core abstractions covered in other chapters, ALWAYS use proper Markdown links like this: [Chapter Title](chapter_1.1.md).
+- When you need to refer to other core abstractions covered in other chapters, ALWAYS use proper Markdown links like this: [Chapter Title](chapter_110.md). We use 3-digit numbers for chapter numbering, e.g., 1.=100 1.1=110, 1.2=120, etc.
 - Include example code snippets when you refer to any code.
 - Each code block should be BELOW 15 lines! If longer code blocks are needed, break them down into smaller pieces and walk through them one-by-one.
 - Describe the internal implementation to help understand what's under the hood.
@@ -85,11 +85,9 @@ Output rules:
 - Do not add ```markdown at the beginning or ``` at the end.
 
 Example output:
-<output>
 ## Chapter 1. Introduction
 Content
 
 ### 1.1. ...
 Content
-</output>
 """
