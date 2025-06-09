@@ -74,7 +74,7 @@ def construct_writer_agents(
     chapter_filenames = []
     table_of_contents = docs_plan.get("table_of_contents", [])
 
-    batch_size = 5
+    batch_size = 10
     k = 0
 
     for idx, chapter in enumerate(table_of_contents):
