@@ -18,7 +18,7 @@ def read_codebase(file_path: str) -> str:
 
 def parse_planner_response(response: str) -> Dict:
     """
-    Parse the planner response and return the chapters
+    Parse the planner response and return the table of contents
     """
     pattern = r"```json\s*(.*?)```"
     matches = re.findall(pattern, response, re.DOTALL)
