@@ -34,5 +34,6 @@ Example result:
 
 ## References
 
-* [Agent development kit](https://google.github.io/adk-docs/)
+* [Gemini Models](https://ai.google.dev/gemini-api/docs/models)
+* [Agent Development Kit](https://google.github.io/adk-docs/)
 * [Multi-agent System](https://google.github.io/adk-docs/agents/multi-agents/)
