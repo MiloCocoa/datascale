@@ -1,6 +1,33 @@
-# Agentic Documentation Writer
+# Agentic Knowledge Base Builder
 
 Build modular agents that plan and write documentation for your projects.
+
+
+```mermaid
+graph TD
+    A["📁 Codebase/Repository"] --> B["🔍 Content Reader"]
+    B --> C["📋 Planner Agent"]
+    C --> D["📄 Documentation Outline"]
+    D --> E["✍️ Writer Agents"]
+    E --> F["📖 Knowledge Base Chapters"]
+
+    subgraph "Agent System"
+        C["📋 Planner Agent<br/>Gemini 2.5 Flash"]
+        E["✍️ Writer Agents<br/>Gemini 2.0 Flash"]
+    end
+
+    subgraph "Output Structure"
+        F --> G["chapter_100.md<br/>(Overview)"]
+        F --> H["chapter_110.md<br/>(Section 1.1)"]
+        F --> I["chapter_120.md<br/>(Section 1.2)"]
+        F --> J["chapter_200.md<br/>(Chapter 2)"]
+    end
+
+    style A fill:#e1f5fe
+    style C fill:#fff3e0
+    style E fill:#f3e5f5
+    style F fill:#e8f5e8
+```
 
 ## Commands
 
