@@ -1,44 +1,96 @@
-## 2. Marketing CRM Touchpoint Mart (`mart_crm_touchpoint`)
+## 2. The Core Analytical Model: `mart_crm_touchpoint`
 
-The `mart_crm_touchpoint` table is the cornerstone for marketing analytics. It addresses the challenge of unifying disparate data sources related to customer interactions, providing a single, comprehensive view of all marketing touchpoints. This enables marketers to analyze customer journeys, campaign performance, and attribution with greater precision.
+The `mart_crm_touchpoint` table is the cornerstone of the GitLab CRM Touchpoint Data Model. It addresses the challenge of fragmented CRM data by providing a unified, analytical-ready view of all marketing and sales touchpoints. This model allows data consumers to understand the complete customer journey, perform sophisticated attribution modeling, and gain actionable insights into marketing effectiveness.
 
-**Central Use Case:**
+**Central Use Case:** A marketing analyst wants to understand which marketing channels are most effective at driving Marketing Qualified Leads (MQLs). They need to analyze touchpoint data, considering the sequence of interactions a person has with GitLab before becoming an MQL. The `mart_crm_touchpoint` table enables this analysis by consolidating touchpoint information with person-level attributes and attribution flags.
 
-Imagine a marketing analyst wants to understand the effectiveness of a recent email campaign. They need to know:
+### 2.1. Purpose and Value
 
-*   Which customers interacted with the email?
-*   What were the key characteristics of these customers (e.g., job title, industry)?
-*   Which campaign led to the most engagement?
-*   Did these touchpoints eventually lead to MQLs (Marketing Qualified Leads)?
-*   What was the overall revenue influenced by this campaign?
+The `mart_crm_touchpoint` model serves the following key purposes:
 
-The `mart_crm_touchpoint` table consolidates all this information, enabling the analyst to answer these questions efficiently.
+*   **Data Unification:** Integrates data from disparate sources like Salesforce, Marketo, Bizible, and Zuora into a single table.
+*   **Customer Journey Analysis:** Provides a chronological view of touchpoints, enabling the analysis of customer interactions over time.
+*   **Attribution Modeling:** Supports various attribution models by providing the necessary data for calculating touchpoint influence on key milestones (e.g., inquiry, MQL, accepted).
+*   **Performance Analysis:** Facilitates the evaluation of marketing channel and campaign performance.
 
-### Key Metrics & Calculated Fields
+The primary value of this model lies in its ability to provide a holistic understanding of the customer journey, enabling data-driven decision-making in marketing and sales.
 
-The `mart_crm_touchpoint` table includes a number of critical metrics and calculated fields that are essential for marketing analysis:
+### 2.2. Key Fields
 
-*   **`bizible_count_first_touch`**: A binary flag indicating whether a given touchpoint was the first interaction a customer had with the company. This helps identify initial touchpoints in the customer journey.
+The `mart_crm_touchpoint` table contains a rich set of fields, providing granular details about each touchpoint and its context. Here's a breakdown of some of the essential columns:
+
+*   **`dim_crm_touchpoint_id`:**  A unique identifier for each touchpoint, linking to the detailed touchpoint information in the `dim_crm_touchpoint` table (see [3.5. `dim_crm_touchpoint`](chapter_350.md)).
+*   **`touchpoint_person_campaign_date_id`**: A unique ID based on the dim_crm_person, dim_campaign and bizible_touchpoint_date_time IDs to ensure uniqueness in the model.
+
     ```sql
-    CASE
-        WHEN dim_crm_touchpoint.bizible_touchpoint_position LIKE '%FT%' THEN 1
-        ELSE 0
-    END AS bizible_count_first_touch
+    md5(cast(coalesce(cast(fct_crm_touchpoint.dim_crm_person_id as TEXT), '_dbt_utils_surrogate_key_null_') || '-' || coalesce(cast(dim_campaign.dim_campaign_id as TEXT), '_dbt_utils_surrogate_key_null_') || '-' || coalesce(cast(dim_crm_touchpoint.bizible_touchpoint_date_time as TEXT), '_dbt_utils_surrogate_key_null_') as TEXT)) AS touchpoint_person_campaign_date_id,
     ```
+*   **`bizible_touchpoint_date_time`:** The date and time of the touchpoint.
+*   **`bizible_touchpoint_position`:** Indicates the position of the touchpoint in the customer journey (e.g., First Touch, Lead Creation Touch).
+*   **`bizible_marketing_channel_path`:** The marketing channel path associated with the touchpoint (e.g., Paid Search.Google AdWords).
+*   **`utm_campaign`:** The UTM campaign parameter, used for tracking campaign performance.
 
-*   **`bizible_count_lead_creation_touch`**: Indicates whether the touchpoint led to the creation of a lead record in the CRM. This is crucial for lead generation analysis.
-    ```sql
-    fct_crm_touchpoint.bizible_count_lead_creation_touch
-    ```
+    *   Parsed components: The `utm_campaign` field is often parsed into more granular components like `utm_campaign_date`, `utm_campaign_region`, `utm_campaign_budget`, etc., providing more detailed insights into campaign targeting and characteristics.
+*   **`integrated_campaign_grouping`:** A higher-level grouping of campaigns, enabling analysis at a more aggregated level.
+*   **`gtm_motion`:** Indicates the Go-To-Market (GTM) motion associated with the touchpoint (e.g., Self-Service, Channel).
+*   **`is_dg_influenced`, `is_dg_sourced`:** Flags indicating whether the touchpoint was influenced by or sourced from Demand Generation efforts.
+*   **`is_fmm_influenced`, `is_fmm_sourced`:** Flags indicating whether the touchpoint was influenced by or sourced from Field Marketing efforts.
+*   **`count_inquiry`, `count_mql`, `count_accepted`:**  Counts of inquiries, MQLs, and accepted leads associated with the touchpoint, used for attribution analysis.
 
-*   **`bizible_count_u_shaped`**: Attribution credit assigned to the touchpoint based on a U-shaped attribution model. This model typically gives significant weight to the first and last touchpoints in a customer journey.
-    ```sql
-    fct_crm_touchpoint.bizible_count_u_shaped
-    ```
-
-*   **`is_fmm_influenced`**: A flag indicating whether the touchpoint was influenced by a Field Marketing Manager (FMM) campaign or content. This is determined by examining the `budget_holder` of the campaign, the `user_role_name` of the campaign owner, the `utm_content` of the touchpoint, and the `type` of the campaign.
     ```sql
      CASE
+        WHEN dim_crm_touchpoint.bizible_touchpoint_position LIKE '%LC%'
+          AND dim_crm_touchpoint.bizible_touchpoint_position NOT LIKE '%PostLC%'
+          THEN 1
+        ELSE 0
+      END AS count_inquiry,
+      CASE
+        WHEN fct_crm_person.mql_date_first >= dim_crm_touchpoint.bizible_touchpoint_date
+          THEN 1
+        ELSE 0
+      END AS count_mql,
+      CASE
+        WHEN fct_crm_person.accepted_date >= dim_crm_touchpoint.bizible_touchpoint_date
+          THEN 1
+        ELSE '0'
+      END AS count_accepted,
+    ```
+
+### 2.3. Joining Logic
+
+The `mart_crm_touchpoint` table is built by joining data from several dimension and fact tables. Understanding the joining logic is crucial for interpreting the data and ensuring accurate analysis.
+
+```mermaid
+graph LR
+    A[fct_crm_touchpoint] --> B(dim_crm_touchpoint);
+    A --> C(dim_campaign);
+    A --> D(fct_campaign);
+    A --> E(dim_crm_person);
+    A --> F(fct_crm_person);
+    A --> G(dim_crm_account);
+    A --> H(dim_crm_user);
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+```
+
+*   **`fct_crm_touchpoint`:** This fact table contains the core attribution counts associated with each touchpoint and serves as the starting point for the join. It's joined to:
+    *   **`dim_crm_touchpoint`:** on `fct_crm_touchpoint.dim_crm_touchpoint_id = dim_crm_touchpoint.dim_crm_touchpoint_id` to bring in detailed touchpoint attributes.
+    *   **`dim_campaign`:** on `fct_crm_touchpoint.dim_campaign_id = dim_campaign.dim_campaign_id` to add campaign information.
+    *   **`fct_campaign`:** on `fct_crm_touchpoint.dim_campaign_id = fct_campaign.dim_campaign_id` to include campaign performance metrics.
+    *   **`dim_crm_person`:** on `fct_crm_touchpoint.dim_crm_person_id = dim_crm_person.dim_crm_person_id` to add person-level attributes.
+    *   **`fct_crm_person`:** on `fct_crm_touchpoint.dim_crm_person_id = fct_crm_person.dim_crm_person_id` to include person-level lifecycle dates and metrics.
+    *   **`dim_crm_account`:** on `fct_crm_touchpoint.dim_crm_account_id = dim_crm_account.dim_crm_account_id` to add account-level information.
+    *   **`dim_crm_user`:** on `fct_crm_touchpoint.dim_crm_user_id = dim_crm_user.dim_crm_user_id` to add sales rep information.
+*   Additional joins include:
+    *   Joining `dim_crm_user` a second time (aliased as `campaign_owner`) on `fct_campaign.campaign_owner_id = campaign_owner.dim_crm_user_id` to provide details about the campaign owner.
+
+### 2.4. Attribution Calculations
+
+Several fields in `mart_crm_touchpoint` are derived through attribution calculations, providing insights into the influence and source of touchpoints.
+
+*   **`is_fmm_influenced`:** This flag is set to 1 if the touchpoint is associated with a Field Marketing Manager (FMM) or if the campaign or lead source indicates field event involvement.
+
+    ```sql
+    CASE
         WHEN dim_campaign.budget_holder = 'fmm'
               OR campaign_rep_role_name = 'Field Marketing Manager'
               OR LOWER(dim_crm_touchpoint.utm_content) LIKE '%field%'
@@ -46,134 +98,109 @@ The `mart_crm_touchpoint` table includes a number of critical metrics and calcul
               OR LOWER(dim_crm_person.lead_source) = 'field event'
           THEN 1
         ELSE 0
-      END AS is_fmm_influenced
+      END AS is_fmm_influenced,
     ```
+*   **`is_fmm_sourced`:**  This flag is set to 1 if the touchpoint is a "First Touch" and `is_fmm_influenced` is also 1.
 
-*   **`is_fmm_sourced`**: Indicates whether the touchpoint was the first touch and was influenced by an FMM.
     ```sql
     CASE
         WHEN dim_crm_touchpoint.bizible_touchpoint_position LIKE '%FT%'
           AND is_fmm_influenced = 1
           THEN 1
         ELSE 0
-      END AS is_fmm_sourced
+      END AS is_fmm_sourced,
     ```
+*   **`integrated_budget_holder`:** This field categorizes touchpoints based on the marketing team responsible for the campaign budget. The field uses UTM parameters, campaign details, and ad campaign names from the sources to determine the right budget holder.
 
-*   **`integrated_budget_holder`**: Categorizes the budget holder responsible for the touchpoint (e.g., 'Field Marketing', 'Digital Marketing'). This is derived from the campaign's `budget_holder`, the touchpoint's `utm_budget` and `bizible_ad_campaign_name`, and the campaign owner's `user_role_name`.
     ```sql
     CASE
       WHEN LOWER(dim_campaign.budget_holder) = 'fmm'
         THEN 'Field Marketing'
-      WHEN LOWER(dim_campaign.budget_holder) = 'dmp'
+      WHEN LOWER(dim_crm_touchpoint.utm_budget) = 'dmp'
         THEN 'Digital Marketing'
       ...
-    END AS integrated_budget_holder
+    END AS integrated_budget_holder,
     ```
 
-*   **`count_inquiry`**: A binary flag indicating whether the touchpoint's position is 'LC' (Lead Creation) and not 'PostLC'.
-    ```sql
-     CASE
-        WHEN dim_crm_touchpoint.bizible_touchpoint_position LIKE '%LC%'
-          AND dim_crm_touchpoint.bizible_touchpoint_position NOT LIKE '%PostLC%'
-          THEN 1
-        ELSE 0
-      END AS count_inquiry
-    ```
+### 2.5. Weighted Touchpoints
 
-*   **`count_true_inquiry`**: Checks if the `true_inquiry_date` is on or after the `bizible_touchpoint_date`.
-    ```sql
-    CASE
-        WHEN fct_crm_person.true_inquiry_date >= dim_crm_touchpoint.bizible_touchpoint_date
-          THEN 1
-        ELSE 0
-      END AS count_true_inquiry
-    ```
+To support more sophisticated attribution models, the `mart_crm_touchpoint` table includes fields for weighting touchpoints based on their proximity to the MQL (Marketing Qualified Lead) milestone.
 
-*   **`count_mql`**: A binary flag indicating whether the `mql_date_first` is on or after the `bizible_touchpoint_date`.
-    ```sql
-    CASE
-        WHEN fct_crm_person.mql_date_first >= dim_crm_touchpoint.bizible_touchpoint_date
-          THEN 1
-        ELSE 0
-      END AS count_mql
-    ```
+*   **`pre_mql_touches`:**  A count of all touchpoints a person had *before* becoming an MQL.
+*   **`pre_mql_weight`:** A weight assigned to each touchpoint before the MQL date, calculated as `1 / pre_mql_touches`.  Touchpoints occurring after the MQL date have a weight of 0.
 
-*   **`count_net_new_mql`**: Equals `bizible_count_lead_creation_touch` if the touchpoint led to an MQL; otherwise, it's 0.
-    ```sql
-    CASE
-        WHEN fct_crm_person.mql_date_first >= dim_crm_touchpoint.bizible_touchpoint_date
-          THEN fct_crm_touchpoint.bizible_count_lead_creation_touch
-        ELSE 0
-      END AS count_net_new_mql
-    ```
+    The logic is as follows:
 
-*   **`count_accepted`**: A binary flag indicating if the `accepted_date` is on or after the `bizible_touchpoint_date`.
-    ```sql
-    CASE
-        WHEN fct_crm_person.accepted_date >= dim_crm_touchpoint.bizible_touchpoint_date
-          THEN 1
-        ELSE '0'
-      END AS count_accepted
-    ```
+    1.  **Count Pre-MQL Touchpoints:** Count the number of touchpoints for each person that occurred before their MQL date.
 
-*   **`count_net_new_accepted`**: This equals `bizible_count_lead_creation_touch` if the touchpoint led to an Accepted Lead; otherwise, it is 0.
-    ```sql
-    CASE
-        WHEN fct_crm_person.accepted_date >= dim_crm_touchpoint.bizible_touchpoint_date
-          THEN fct_crm_touchpoint.bizible_count_lead_creation_touch
-        ELSE 0
-      END AS count_net_new_accepted
-    ```
+        ```sql
+        WITH count_of_pre_mql_tps AS (
+            SELECT DISTINCT
+              joined.email_hash,
+              COUNT(DISTINCT joined.dim_crm_touchpoint_id) AS pre_mql_touches
+            FROM joined
+            WHERE joined.mql_date_first IS NOT NULL
+              AND joined.bizible_touchpoint_date <= joined.mql_date_first
+            GROUP BY 1
+        )
+        ```
+    2.  **Calculate Pre-MQL Weight:** Calculate the weight for each pre-MQL touchpoint.
 
-*   **`mql_crm_person_id`**: The `sfdc_record_id` of the person if the touchpoint resulted in an MQL.
-    ```sql
-    CASE
-        WHEN count_mql=1 THEN dim_crm_person.sfdc_record_id
-        ELSE NULL
-      END AS mql_crm_person_id
-    ```
+        ```sql
+        , pre_mql_tps_by_person AS (
+            SELECT
+              count_of_pre_mql_tps.email_hash,
+              count_of_pre_mql_tps.pre_mql_touches,
+              1/count_of_pre_mql_tps.pre_mql_touches AS pre_mql_weight
+            FROM count_of_pre_mql_tps
+            GROUP BY 1,2
+        )
+        ```
+    3.  **Assign Weights to Touchpoints:** Assign the calculated weights to the appropriate touchpoints.  Post-MQL touchpoints are assigned a weight of 0.
 
-*   **`pre_mql_weight`**: A fractional weight assigned to touchpoints that occurred before the first MQL date for a given person, calculated as 1 divided by the total number of pre-MQL touches for that person. This helps in attributing value to touchpoints early in the customer journey.
-    ```sql
-    1/count_of_pre_mql_tps.pre_mql_touches AS pre_mql_weight
-    ```
+        ```sql
+        , pre_mql_tps AS (
+            SELECT
+              joined.dim_crm_touchpoint_id,
+              pre_mql_tps_by_person.pre_mql_weight
+            FROM pre_mql_tps_by_person
+            LEFT JOIN joined
+              ON pre_mql_tps_by_person.email_hash=joined.email_hash
+            WHERE joined.mql_date_first IS NOT NULL
+              AND joined.bizible_touchpoint_date <= joined.mql_date_first
+        )
+        ```
 
-These metrics and fields provide a comprehensive view of marketing touchpoint performance, enabling detailed analysis and informed decision-making.
+        ```sql
+        , post_mql_tps AS (
+            SELECT
+              joined.dim_crm_touchpoint_id,
+              0 AS pre_mql_weight
+            FROM joined
+            WHERE joined.bizible_touchpoint_date > joined.mql_date_first
+              OR joined.mql_date_first IS null
+        )
+        ```
 
-### Source Models & Joins
+        ```sql
+        , mql_weighted_tps AS (
+            SELECT *
+            FROM pre_mql_tps
+            UNION ALL
+            SELECT *
+            FROM post_mql_tps
+        )
+        ```
 
-The `mart_crm_touchpoint` is constructed by joining the `fct_crm_touchpoint` fact table with several dimension tables. This multi-table join strategy enriches the touchpoint data with contextual information from various CRM entities.
-
-Here's a breakdown of the source models and joins involved:
-
-```mermaid
-graph LR
-    fct_crm_touchpoint --> dim_crm_touchpoint
-    fct_crm_touchpoint --> dim_campaign
-    fct_crm_touchpoint --> fct_campaign
-    fct_crm_touchpoint --> dim_crm_person
-    fct_crm_touchpoint --> fct_crm_person
-    fct_crm_touchpoint --> dim_crm_account
-    fct_crm_touchpoint --> dim_crm_user
-    fct_campaign --> campaign_owner(dim_crm_user aliased as campaign_owner)
-
-    fct_crm_touchpoint(fct_crm_touchpoint)
-    dim_crm_touchpoint([CRM Touchpoint Dimension](chapter_310.md))
-    dim_campaign([Campaign Dimension](chapter_330.md))
-    fct_campaign([Campaign Fact](chapter_430.md))
-    dim_crm_person([CRM Person Dimension](chapter_320.md))
-    fct_crm_person([CRM Person Fact](chapter_420.md))
-    dim_crm_account([CRM Account Dimension](chapter_340.md))
-    dim_crm_user([CRM User Dimension](chapter_350.md))
-```
-
-1.  **`fct_crm_touchpoint`**: This is the primary fact table, containing the core information about each touchpoint, including the IDs of related entities and key metrics.
-2.  **[CRM Touchpoint Dimension](chapter_310.md) (`dim_crm_touchpoint`)**: This dimension table provides descriptive attributes of each touchpoint, such as the touchpoint type, source, and marketing channel.
-3.  **[Campaign Dimension](chapter_330.md) (`dim_campaign`)**: This dimension table stores descriptive attributes of marketing campaigns, such as the campaign name, type, and status.
-4.  **[Campaign Fact](chapter_430.md) (`fct_campaign`)**: This fact table contains additive measures and key dates for campaigns, facilitating quantitative performance analysis.
-5.  **[CRM Person Dimension](chapter_320.md) (`dim_crm_person`)**: This dimension table stores master data attributes for individuals (leads and contacts), providing a consistent view across marketing and sales.
-6.  **[CRM Person Fact](chapter_420.md) (`fct_crm_person`)**: This fact table captures key dates and flags related to a person's progression through the marketing and sales funnel, enabling lifecycle stage analysis.
-7.  **[CRM Account Dimension](chapter_340.md) (`dim_crm_account`)**: This dimension table provides a holistic view of accounts within the CRM, encompassing their hierarchical structure, demographic information, and various health and engagement indicators.
-8.  **[CRM User Dimension](chapter_350.md) (`dim_crm_user`)**: This dimension table contains detailed information about CRM users, including their roles, departmental affiliations, and sales territories. This table is joined twice, once for the touchpoint owner and once (aliased as `campaign_owner`) for the campaign owner.
-
-By joining these tables, the `mart_crm_touchpoint` table provides a rich, integrated dataset that enables comprehensive marketing analytics.
+        ```sql
+        ,final AS (
+          SELECT
+            joined.*,
+            mql_weighted_tps.pre_mql_weight
+          FROM joined
+          LEFT JOIN mql_weighted_tps
+            ON joined.dim_crm_touchpoint_id=mql_weighted_tps.dim_crm_touchpoint_id
+          WHERE joined.dim_crm_touchpoint_id IS NOT NULL
+        )
+        ```
+This weighting scheme allows for more nuanced attribution modeling, where touchpoints closer to the MQL milestone are given more credit.

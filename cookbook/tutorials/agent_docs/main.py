@@ -1,6 +1,7 @@
 import os
 import json
 import asyncio
+import argparse
 from typing import Dict
 from loguru import logger
 from dotenv import load_dotenv
@@ -8,7 +9,7 @@ from dotenv import load_dotenv
 from google.adk.sessions import InMemorySessionService
 
 from config import APP_NAME, USER_ID, SESSION_ID
-from src.utils import read_codebase, write_json_response
+from src.utils import read_codebase_file, read_codebase_directory, write_json_response
 from src.planner import create_documentation_outline
 from src.writer import sequential_writing_pipeline
 
@@ -65,13 +66,62 @@ async def call_agents(initial_content: str):
     )
 
 
+def parse_arguments():
+    """
+    Parse command line arguments
+    """
+    parser = argparse.ArgumentParser(description="Documentation builder for codebases")
+    parser.add_argument(
+        "--path",
+        type=str,
+        default="./data",
+        help="Path to a file or directory containing the codebase to document"
+    )
+    parser.add_argument(
+        "--max-size",
+        type=int,
+        default=1000000,
+        help="Maximum content size in characters (default: 1,000,000)"
+    )
+    return parser.parse_args()
+
+
 # Run the Agent
 async def main():
     logger.info("Running documentation builder")
-    content = read_codebase("data/gitlab_crm.sql")
 
-    if not content: logger.error("Content not found!")
-    else: await call_agents(content)
+    # Parse command line arguments
+    args = parse_arguments()
+    path = args.path
+    max_size = args.max_size
+
+    logger.info(f"Processing path: {path}")
+    logger.info(f"Maximum content size: {max_size:,} characters")
+
+    # 1. Read contents
+    # ====================================================================
+    content = None
+    if os.path.isdir(path):
+        logger.info(f"Reading directory: {path}")
+        content = read_codebase_directory(path, max_size)
+    elif os.path.isfile(path):
+        logger.info(f"Reading single file: {path}")
+        content = read_codebase_file(path)
+    else:
+        logger.error(f"Path does not exist: {path}")
+        return
+
+    # 2. Log contents
+    # ====================================================================
+    with open("output/content.txt", "w") as f:
+        f.write(content)
+
+    # 3. Agent Workflow
+    # ====================================================================
+    if not content:
+        logger.error("Content not found!")
+    else:
+        await call_agents(content)
 
 
 if __name__ == "__main__":

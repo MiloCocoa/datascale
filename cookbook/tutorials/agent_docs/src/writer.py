@@ -8,7 +8,7 @@ from google.adk.agents import LlmAgent, SequentialAgent
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
-from config import APP_NAME, WRITER_MODEL
+from config import APP_NAME, WRITER_MODEL, WRITER_BATCH_SIZE
 from src.prompt import WRITER_INSTRUCTIONS
 
 
@@ -74,9 +74,7 @@ def construct_writer_agents(
     chapter_filenames = []
     table_of_contents = docs_plan.get("table_of_contents", [])
 
-    batch_size = 10
     k = 0
-
     for idx, chapter in enumerate(table_of_contents):
 
         chapter_name = chapter.get("name")
@@ -101,7 +99,7 @@ def construct_writer_agents(
             logger.info(f"Skipping {filename} because it already exists.")
             continue
 
-        if k == batch_size:
+        if k == WRITER_BATCH_SIZE:
             return sub_agents, chapter_filenames
 
         write_report_agent = LlmAgent(

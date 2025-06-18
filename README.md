@@ -15,3 +15,11 @@ Manage your data models, database diagrams, data catalog, and wiki - all in one 
 * [A multi-agent documentation builder](./cookbook/tutorials/agent_docs/)
 * [An MCP RAG with Gemini embeddings and Supabase vector](./cookbook/tutorials/mcp_rag/)
 * [LLM embedding visualization with t-SNE](./cookbook/tutorials/tsne_viz/)
+
+## Setup
+
+```bash
+uv venv .venv --python 3.11.6
+source .venv/bin/activate
+uv sync
+```
