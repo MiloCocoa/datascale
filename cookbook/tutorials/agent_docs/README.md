@@ -6,9 +6,18 @@ Build modular agents that plan and write documentation for your projects.
 
 ```bash
 python -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 
+# Run
+
+# Default path is ./data
+# Default size limit (1M characters or ~250K tokens)
 python main.py
+
+# Set custom size limit (4M characters or ~1M tokens)
+python main.py --path ./data --max-size 4000000
+
 ```
 
 ## Process log
