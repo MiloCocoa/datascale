@@ -73,8 +73,7 @@ Writing instructions:
 - Begin with a high-level motivation explaining what problem this abstraction solves.
 - Start with a central use case as a concrete example. The chapter should guide the reader to understand how to solve this use case. Make it beginners friendly.
 - When you need to refer to other core abstractions covered in other chapters, ALWAYS use proper Markdown links like this: [Chapter Title](chapter_110.md). Use standard chapter numbering: 1., 1.1., etc. and use 3-digit numbers for filenames, e.g., 1.=chapter_100 1.1=chapter_110, 1.2=chapter_120, etc.
-- Include example code snippets when you refer to any code.
-- Each code block should be BELOW 15 lines! If longer code blocks are needed, break them down into smaller pieces and walk through them one-by-one.
+- Include example code snippets when you refer to any code.Each code block should be BELOW 15 lines! If longer code blocks are needed, break them down into smaller pieces and walk through them one-by-one.
 - Describe the internal implementation to help understand what's under the hood.
 - It's recommended to use mermaid diagrams to illustrate complex concepts (```mermaid``` format). Do not to add markdown links/references to the diagrams.
 - A chapter should be clear and concise, with no more than 8,000 tokens or 6,000 words.

@@ -2,6 +2,9 @@
 
 Build modular agents that plan and write documentation for your projects.
 
+Check out the [blog post](https://medium.com/gitconnected/building-a-knowledge-base-from-your-codebase-using-google-adk-7508e845bdc1) for more details.
+
+## Architecture
 
 ```mermaid
 graph TD
@@ -37,7 +40,6 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Run
-
 # Default path is ./data
 # Default size limit (1M characters or ~250K tokens)
 python main.py
@@ -69,5 +71,6 @@ Example result:
 ## References
 
 * [Gemini Models](https://ai.google.dev/gemini-api/docs/models)
+* [AI Studio](https://aistudio.google.com/apikey)
 * [Agent Development Kit](https://google.github.io/adk-docs/)
 * [Multi-agent System](https://google.github.io/adk-docs/agents/multi-agents/)

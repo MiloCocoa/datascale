@@ -158,13 +158,13 @@ graph LR
     fct_campaign --> campaign_owner(dim_crm_user aliased as campaign_owner)
 
     fct_crm_touchpoint(fct_crm_touchpoint)
-    dim_crm_touchpoint([CRM Touchpoint Dimension](chapter_310.md))
-    dim_campaign([Campaign Dimension](chapter_330.md))
-    fct_campaign([Campaign Fact](chapter_430.md))
-    dim_crm_person([CRM Person Dimension](chapter_320.md))
-    fct_crm_person([CRM Person Fact](chapter_420.md))
-    dim_crm_account([CRM Account Dimension](chapter_340.md))
-    dim_crm_user([CRM User Dimension](chapter_350.md))
+    dim_crm_touchpoint(CRM Touchpoint Dimension)
+    dim_campaign(Campaign Dimension)
+    fct_campaign(Campaign Fact)
+    dim_crm_person(CRM Person Dimension)
+    fct_crm_person(CRM Person Fact)
+    dim_crm_account(CRM Account Dimension)
+    dim_crm_user(CRM User Dimension)
 ```
 
 1.  **`fct_crm_touchpoint`**: This is the primary fact table, containing the core information about each touchpoint, including the IDs of related entities and key metrics.

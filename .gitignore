@@ -13,3 +13,4 @@ dist/
 wheels/
 *.egg-info
 
+.*.md
